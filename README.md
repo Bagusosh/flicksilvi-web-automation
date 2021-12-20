@@ -2,7 +2,7 @@
 
 ## Quick Start
 
-Silvi Merchant Web Automation is a regression unittest that
+FlickSilvi Web Automation is a regression unittest that
 Automates Testing using Selenium. Selenium is a well known Browser
 Automation tool to run various tasks in the Browser.
 
