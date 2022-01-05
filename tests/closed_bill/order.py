@@ -20,7 +20,7 @@ from faker import Faker
 from driver.view import MenuViewDriver
 
 
-class EmployeeJobPositionTests(unittest.TestCase):
+class OrderTests(unittest.TestCase):
     def setUp(self) -> None:
         load_dotenv()
         warnings.filterwarnings("ignore", category=DeprecationWarning)
