@@ -35,6 +35,10 @@ class SearchBarTests(unittest.TestCase):
 
         self.valid_first_menu_name = 'Nasi Goreng Ayam'
         self.valid_second_menu_name = 'Singkong Goreng'
+        self.invalid_menu_name = fake.user_name()
+
+        self.valid_menu_description = 'Nasi Goreng Ayam terbaik di Indonesia'
+        self.invalid_menu_description = fake.user_name()
 
         self.valid_new_account_name = fake.first_name()
         self.valid_new_account_phone_number = '08'+fake.aba()
@@ -78,6 +82,7 @@ class SearchBarTests(unittest.TestCase):
         self.button_save_note_xpath = '/html/body/div[2]/div[3]/div/form/div[3]/button'
         self.button_search_bar_xpath = '//*[@id="root"]/div/div/div[1]/div[2]/div[1]/a/button'
         self.button_order_after_search_menu_xpath = '//*[@id="root"]/div/div/div[2]/div[2]/div[1]/header/div[2]/div/div/div/div[3]/div/span/div'
+        self.button_cancelling_search_bar_xpath = '//*[@id="root"]/div/div/div[2]/div[2]/div[1]/header/div[1]/div/div/div/div/div[2]'
         # etc
         self.context = {}
 
@@ -214,6 +219,138 @@ class SearchBarTests(unittest.TestCase):
             assert page_exist is True
             logger.success("Ordering Menu With Search Menu Name Test Case has been Tested")
 
+    def test_ordering_menu_with_search_menu_description(self):
+        with self.driver as driver:
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                   EC.element_to_be_clickable((By.XPATH, self.button_search_bar_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, self.search_menu_list_xpath))
+                )
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            driver.find_element(By.XPATH, self.search_menu_field_xpath).send_keys(self.valid_menu_description)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                )
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            menu_row_elements = driver.find_elements(By.XPATH, self.search_bar_menu_row_xpath)
+            for row_element in menu_row_elements:
+                if row_element.find_element(By.TAG_NAME, 'h5').text == self.valid_first_menu_name:
+                    row_element.find_element(By.TAG_NAME, 'span').click()
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_order_after_search_menu_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.text_to_be_present_in_element((By.TAG_NAME, 'h3'), 'Konfirmasi Order')
+                )
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            # if we not use time.sleep, element for button login cant be clicked, because the element has animation
+            time.sleep(2)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, self.button_login_xpath)),
+                    EC.element_to_be_clickable((By.XPATH, self.button_login_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            driver.find_element(By.ID, 'hp').send_keys('087741331517')
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_login_account_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            data = requests.post('https://staging.flick.id/v1/users/auth/verifikasi-token/login?hp=087741331517&tipeUser=user').json()
+            token = data['data']['token']
+
+            driver.find_element(By.ID, 'otp').send_keys(token)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_login_account_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.ID, 'password'))
+                ).send_keys(150600)
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_login_account_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+
+            # if we use webdriverwait, cant click button payment method
+            time.sleep(2)
+
+            driver.find_element(By.XPATH, '//*[@id="Cash"]').click()
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_order_and_pay_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                return
+
+            # for handle alert prompts
+            alert = Alert(driver)
+            alert.accept()
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, self.order_success_page_xpath))
+                )
+                page_exist = True
+            except TimeoutException:
+                logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
+                page_exist = False
+                return
+
+            assert page_exist is True
+            logger.success("Ordering Menu With Search Menu Description Test Case has been Tested")
+
     def test_search_menu_name_without_ordering(self):
         with self.driver as driver:
             try:
@@ -243,3 +380,165 @@ class SearchBarTests(unittest.TestCase):
                 return
 
             logger.success("Search Menu Name Without Ordering Test Case has been Tested")
+
+    def test_search_menu_description_without_ordering(self):
+        with self.driver as driver:
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                   EC.element_to_be_clickable((By.XPATH, self.button_search_bar_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Search Menu Description Without Ordering Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, self.search_menu_list_xpath))
+                )
+            except TimeoutException:
+                logger.error("Search Menu Description Without Ordering Test Case Resulted Error")
+                return
+
+            driver.find_element(By.XPATH, self.search_menu_field_xpath).send_keys(self.valid_first_menu_name)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                )
+            except TimeoutException:
+                logger.error("Search Menu Description Without Ordering Test Case Resulted Error")
+                return
+
+            logger.success("Search Menu Description Without Ordering Test Case has been Tested")
+
+    def test_cancelling_search_menu_name(self):
+        with self.driver as driver:
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                   EC.element_to_be_clickable((By.XPATH, self.button_search_bar_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Cancelling Search Menu Name Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, self.search_menu_list_xpath))
+                )
+            except TimeoutException:
+                logger.error("Cancelling Search Menu Name Test Case Resulted Error")
+                return
+
+            driver.find_element(By.XPATH, self.search_menu_field_xpath).send_keys(self.valid_first_menu_name)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                )
+            except TimeoutException:
+                logger.error("Cancelling Search Menu Name Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_cancelling_search_bar_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Cancelling Search Menu Name Test Case Resulted Error")
+                return
+
+            logger.success("Cancelling Search Menu Name Test Case has been Tested")
+
+    def test_cancelling_search_menu_description(self):
+        with self.driver as driver:
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_search_bar_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Cancelling Search Menu Description Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, self.search_menu_list_xpath))
+                )
+            except TimeoutException:
+                logger.error("Cancelling Search Menu Description Test Case Resulted Error")
+                return
+
+            driver.find_element(By.XPATH, self.search_menu_field_xpath).send_keys(self.valid_menu_description)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                )
+            except TimeoutException:
+                logger.error("Cancelling Search Menu Description Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_cancelling_search_bar_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Cancelling Search Menu Description Test Case Resulted Error")
+                return
+
+            logger.success("Cancelling Search Menu Description Test Case has been Tested")
+
+    def test_search_menu_with_invalid_name(self):
+        with self.driver as driver:
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                   EC.element_to_be_clickable((By.XPATH, self.button_search_bar_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Cancelling Search Menu With Invalid Name Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, self.search_menu_list_xpath))
+                )
+            except TimeoutException:
+                logger.error("Cancelling Search Menu With Invalid Name Test Case Resulted Error")
+                return
+
+            driver.find_element(By.XPATH, self.search_menu_field_xpath).send_keys(self.invalid_menu_name)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                )
+            except TimeoutException:
+                logger.error("Cancelling Search Menu With Invalid Name Test Case has been Tested")
+                return
+
+    def test_search_menu_with_invalid_description(self):
+        with self.driver as driver:
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_search_bar_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Cancelling Search Menu With Invalid Description Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, self.search_menu_list_xpath))
+                )
+            except TimeoutException:
+                logger.error("Cancelling Search Menu With Invalid Description Test Case Resulted Error")
+                return
+
+            driver.find_element(By.XPATH, self.search_menu_field_xpath).send_keys(self.invalid_menu_description)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                )
+            except TimeoutException:
+                logger.success("Cancelling Search Menu With Invalid Description Test Case has been Tested")
+                return
