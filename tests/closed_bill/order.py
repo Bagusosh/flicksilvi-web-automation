@@ -33,7 +33,7 @@ class OrderTests(unittest.TestCase):
         self.first_category_name = 'Nasi Goreng'
         self.second_category_name = 'Desserts'
 
-        self.valid_first_menu_name = 'Nasi Goreng Ayam'
+        self.valid_first_menu_name = 'Nasi Goreng Ikan Teri Asin'
         self.valid_second_menu_name = 'Singkong Goreng'
 
         self.valid_new_account_name = fake.first_name()
@@ -64,6 +64,7 @@ class OrderTests(unittest.TestCase):
         self.order_success_page_xpath = '//*[@id="root"]/div/div[1]/div'
         self.payment_method_list_xpath = '//*[@id="root"]/div/div/div/div[4]'
         self.note_field_xpath = '/html/body/div[2]/div[3]/div/form/div[2]/div/textarea'
+        self.order_status_row_xpath = '//*[@id="root"]/div/div/div[1]'
 
         self.button_add_menu_shopping_cart_xpath = '/html/body/div[2]/div[3]/div/div/button'
         self.button_cart_order_xpath = '//*[@id="root"]/div/div/div[2]/div[2]/div[3]/div/span/div'
@@ -164,7 +165,7 @@ class OrderTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, 'password'))
+                    EC.visibility_of_element_located((By.ID, 'password'))
                 ).send_keys(150600)
             except TimeoutException:
                 logger.error("Order Menu With Flick Pay Test Case Resulted Error")
@@ -292,7 +293,7 @@ class OrderTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, 'password'))
+                    EC.visibility_of_element_located((By.ID, 'password'))
                 ).send_keys(150600)
             except TimeoutException:
                 logger.error("Order Menu With Cash Test Case Resulted Error")
@@ -420,7 +421,7 @@ class OrderTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, 'password'))
+                    EC.visibility_of_element_located((By.ID, 'password'))
                 ).send_keys(150600)
             except TimeoutException:
                 logger.error("Order Menu With Debit Test Case Resulted Error")
@@ -551,7 +552,7 @@ class OrderTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, 'password'))
+                    EC.visibility_of_element_located((By.ID, 'password'))
                 ).send_keys(150600)
             except TimeoutException:
                 logger.error("Order Menu Register First Test Case Resulted Error")
@@ -559,7 +560,7 @@ class OrderTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, 'konfirmasiPassword'))
+                    EC.visibility_of_element_located((By.ID, 'konfirmasiPassword'))
                 ).send_keys(150600)
             except TimeoutException:
                 logger.error("Order Menu Register First Test Case Resulted Error")
@@ -687,7 +688,7 @@ class OrderTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, 'password'))
+                    EC.visibility_of_element_located((By.ID, 'password'))
                 ).send_keys(150600)
             except TimeoutException:
                 logger.error("Order Menu Add Notes Test Case Resulted Error")
@@ -706,7 +707,7 @@ class OrderTests(unittest.TestCase):
             # if we use webdriverwait, cant click button payment method
             time.sleep(2)
 
-            driver.find_element(By.XPATH, '//*[@id="Flick Pay"]').click()
+            driver.find_element(By.XPATH, '//*[@id="Cash"]').click()
 
             try:
                 _ = WebDriverWait(driver, 10).until(
@@ -816,7 +817,7 @@ class OrderTests(unittest.TestCase):
 
                 try:
                     _ = WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.ID, 'password'))
+                        EC.visibility_of_element_located((By.ID, 'password'))
                     ).send_keys(150600)
                 except TimeoutException:
                     logger.error("Check Order Status After Ordering Test Case Resulted Error")
@@ -866,8 +867,26 @@ class OrderTests(unittest.TestCase):
                 except TimeoutException:
                     logger.error("Check Order Status After Ordering Test Case Resulted Error")
 
+                try:
+                    _ = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.XPATH, self.order_status_row_xpath))
+                    )
+                except TimeoutException:
+                    logger.error("Check Order Status After Ordering Test Case Resulted Error")
+
                 assert page_exist is True
+                assert self.order_status_row_xpath in driver.page_source
                 logger.success("Order Menu With Cash Test Case has been Tested")
+
+    @classmethod
+    def as_suite(cls, test_suite: unittest.TestSuite) -> unittest.TestSuite:
+        test_suite.addTest(cls('test_order_menu_register_first'))
+        test_suite.addTest(cls('test_order_menu_with_flick_pay'))
+        test_suite.addTest(cls('test_order_menu_with_cash'))
+        test_suite.addTest(cls('test_order_menu_with_debit'))
+        test_suite.addTest(cls('test_order_menu_add_notes'))
+        test_suite.addTest(cls('test_check_order_status_after_ordering'))
+        return test_suite
 
     def tearDown(self) -> None:
         pass
