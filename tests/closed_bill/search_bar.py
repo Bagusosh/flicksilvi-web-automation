@@ -50,6 +50,8 @@ class SearchBarTests(unittest.TestCase):
             phonenum=self.valid_new_account_phone_number
         )
 
+        self.page_text_error = 'Yah, yang kamu cari belum ada'
+
         # id
         self.valid_first_category_id = 'nasi-goreng'
         self.valid_second_category_id = 'desserts'
@@ -71,6 +73,8 @@ class SearchBarTests(unittest.TestCase):
         self.search_menu_list_xpath = '//*[@id="root"]/div/div/div[2]/div[2]/div[1]/header/div[2]/div/div/div'
         self.search_menu_field_xpath = '/html/body/div/div/div/div[2]/div[2]/div[1]/header/div[1]/div/div/div/div/div[1]/div/input'
         self.search_bar_menu_row_xpath = '//*[@id="root"]/div/div/div[2]/div[2]/div[1]/header/div[2]/div/div/div/div[1]/div/div/div/div/div'
+        self.page_text_error_xpath = '//*[@id="root"]/div/div/div[2]/div[2]/div[1]/header/div[2]/div/div/div/div[1]/div/div/div/div'
+        self.search_bar_header_xpath = '//*[@id="root"]/div/div/div[2]/div[2]/div[1]/header/div[1]'
 
         self.button_add_menu_shopping_cart_xpath = '/html/body/div[2]/div[3]/div/div/button'
         self.button_cart_order_xpath = '//*[@id="root"]/div/div/div[2]/div[2]/div[3]/div/span/div'
@@ -173,7 +177,7 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, 'password'))
+                    EC.visibility_of_element_located((By.ID, 'password'))
                 ).send_keys(150600)
             except TimeoutException:
                 logger.error("Ordering Menu With Search Menu Name Test Case Resulted Error")
@@ -273,7 +277,7 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.button_login_xpath)),
+                    EC.visibility_of_element_located((By.XPATH, self.button_login_xpath)),
                     EC.element_to_be_clickable((By.XPATH, self.button_login_xpath))
                 ).click()
             except TimeoutException:
@@ -305,7 +309,7 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, 'password'))
+                    EC.visibility_of_element_located((By.ID, 'password'))
                 ).send_keys(150600)
             except TimeoutException:
                 logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
@@ -379,6 +383,7 @@ class SearchBarTests(unittest.TestCase):
                 logger.error("Search Menu Name Without Ordering Test Case Resulted Error")
                 return
 
+            assert self.page_text_error not in driver.page_source
             logger.success("Search Menu Name Without Ordering Test Case has been Tested")
 
     def test_search_menu_description_without_ordering(self):
@@ -409,6 +414,7 @@ class SearchBarTests(unittest.TestCase):
                 logger.error("Search Menu Description Without Ordering Test Case Resulted Error")
                 return
 
+            assert self.page_text_error not in driver.page_source
             logger.success("Search Menu Description Without Ordering Test Case has been Tested")
 
     def test_cancelling_search_menu_name(self):
@@ -447,6 +453,7 @@ class SearchBarTests(unittest.TestCase):
                 logger.error("Cancelling Search Menu Name Test Case Resulted Error")
                 return
 
+            assert self.search_bar_header_xpath not in driver.page_source
             logger.success("Cancelling Search Menu Name Test Case has been Tested")
 
     def test_cancelling_search_menu_description(self):
@@ -485,6 +492,7 @@ class SearchBarTests(unittest.TestCase):
                 logger.error("Cancelling Search Menu Description Test Case Resulted Error")
                 return
 
+            assert self.search_bar_header_xpath not in driver.page_source
             logger.success("Cancelling Search Menu Description Test Case has been Tested")
 
     def test_search_menu_with_invalid_name(self):
@@ -494,7 +502,7 @@ class SearchBarTests(unittest.TestCase):
                    EC.element_to_be_clickable((By.XPATH, self.button_search_bar_xpath))
                 ).click()
             except TimeoutException:
-                logger.error("Cancelling Search Menu With Invalid Name Test Case Resulted Error")
+                logger.error("Search Menu With Invalid Name Test Case Resulted Error")
                 return
 
             try:
@@ -502,18 +510,22 @@ class SearchBarTests(unittest.TestCase):
                     EC.visibility_of_element_located((By.XPATH, self.search_menu_list_xpath))
                 )
             except TimeoutException:
-                logger.error("Cancelling Search Menu With Invalid Name Test Case Resulted Error")
+                logger.error("Search Menu With Invalid Name Test Case Resulted Error")
                 return
 
             driver.find_element(By.XPATH, self.search_menu_field_xpath).send_keys(self.invalid_menu_name)
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                    EC.text_to_be_present_in_element((By.XPATH, self.page_text_error_xpath), self.page_text_error)
                 )
             except TimeoutException:
-                logger.error("Cancelling Search Menu With Invalid Name Test Case has been Tested")
+                logger.error("Search Menu With Invalid Name Test Case Resulted Error")
                 return
+
+            assert self.page_text_error in driver.page_source
+            assert self.search_bar_menu_row_xpath not in driver.page_source
+            logger.success("Search Menu With Invalid Name Test Case has been Tested")
 
     def test_search_menu_with_invalid_description(self):
         with self.driver as driver:
@@ -522,7 +534,7 @@ class SearchBarTests(unittest.TestCase):
                     EC.element_to_be_clickable((By.XPATH, self.button_search_bar_xpath))
                 ).click()
             except TimeoutException:
-                logger.error("Cancelling Search Menu With Invalid Description Test Case Resulted Error")
+                logger.error("Search Menu With Invalid Description Test Case Resulted Error")
                 return
 
             try:
@@ -530,15 +542,34 @@ class SearchBarTests(unittest.TestCase):
                     EC.visibility_of_element_located((By.XPATH, self.search_menu_list_xpath))
                 )
             except TimeoutException:
-                logger.error("Cancelling Search Menu With Invalid Description Test Case Resulted Error")
+                logger.error("Search Menu With Invalid Description Test Case Resulted Error")
                 return
 
             driver.find_element(By.XPATH, self.search_menu_field_xpath).send_keys(self.invalid_menu_description)
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                    EC.text_to_be_present_in_element((By.XPATH, self.page_text_error_xpath), self.page_text_error)
                 )
             except TimeoutException:
-                logger.success("Cancelling Search Menu With Invalid Description Test Case has been Tested")
+                logger.error("Search Menu With Invalid Description Test Case Resulted Error")
                 return
+
+            assert self.page_text_error in driver.page_source
+            assert self.search_bar_menu_row_xpath not in driver.page_source
+            logger.success("Search Menu With Invalid Description Test Case has been Tested")
+
+    @classmethod
+    def as_suite(cls, test_suite: unittest.TestSuite) -> unittest.TestSuite:
+        test_suite.addTest(cls('test_search_menu_name_without_ordering'))
+        test_suite.addTest(cls('test_search_menu_description_without_ordering'))
+        test_suite.addTest(cls('test_ordering_menu_with_search_menu_name'))
+        test_suite.addTest(cls('test_ordering_menu_with_search_menu_description'))
+        test_suite.addTest(cls('test_cancelling_search_menu_name'))
+        test_suite.addTest(cls('test_cancelling_search_menu_description'))
+        test_suite.addTest(cls('test_search_menu_with_invalid_name'))
+        test_suite.addTest(cls('test_search_menu_with_invalid_description'))
+        return test_suite
+
+    def tearDown(self) -> None:
+        pass
