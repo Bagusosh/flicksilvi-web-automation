@@ -35,6 +35,7 @@ class OrderTests(unittest.TestCase):
 
         self.valid_first_menu_name = 'Nasi Goreng Ikan Teri Asin'
         self.valid_second_menu_name = 'Singkong Goreng'
+        self.valid_account_phone_number = '087741331517'
 
         self.valid_new_account_name = fake.first_name()
         self.valid_new_account_phone_number = '08'+fake.aba()
@@ -44,6 +45,10 @@ class OrderTests(unittest.TestCase):
 
         self.ep_register = 'https://staging.flick.id/v1/users/auth/verifikasi-token?hp={phonenum}&tipe=registrasi&tipeUser=user'.format(
             phonenum=self.valid_new_account_phone_number
+        )
+
+        self.ep_login = 'https://staging.flick.id/v1/users/auth/verifikasi-token/login?hp={valid_phone_num}&tipeUser=user'.format(
+            valid_phone_num=self.valid_account_phone_number
         )
 
         # id
@@ -72,7 +77,7 @@ class OrderTests(unittest.TestCase):
         self.button_register_xpath = '//*[@id="root"]/div/div/div/div[1]/div[2]/div[1]/button[1]'
         self.button_login_account_xpath = '//*[@id="root"]/div/div/div/div[1]/form/div[4]/button'
         self.button_continue_register_xpath = '//*[@id="root"]/div/div/div/div[1]/form/div[7]/button'
-        self.button_order_and_pay_xpath = '//*[@id="root"]/div/div/div/button/span'
+        self.button_order_and_pay_xpath = '//*[@id="root"]/div/div/div/button'
         self.button_save_note_xpath = '/html/body/div[2]/div[3]/div/form/div[3]/button'
         self.button_check_order_status_xpath = '//*[@id="root"]/div/div[1]/div/div[2]/button[1]'
         self.button_check_order_status_navbar_xpath = '//*[@id="root"]/div/div/div[2]/div/button[2]'
@@ -136,7 +141,7 @@ class OrderTests(unittest.TestCase):
                 logger.error("Order Menu With Flick Pay Test Case Resulted Error")
                 return
 
-            driver.find_element(By.ID, 'hp').send_keys('087741331517')
+            driver.find_element(By.ID, 'hp').send_keys(self.valid_account_phone_number)
 
             try:
                 _ = WebDriverWait(driver, 10).until(
@@ -146,7 +151,7 @@ class OrderTests(unittest.TestCase):
                 logger.error("Order Menu With Flick Pay Test Case Resulted Error")
                 return
 
-            data = requests.post('https://staging.flick.id/v1/users/auth/verifikasi-token/login?hp=087741331517&tipeUser=user').json()
+            data = requests.post(self.ep_login).json()
             # for make easy to get data from json
 
             # for key, value in data.items():
@@ -267,7 +272,7 @@ class OrderTests(unittest.TestCase):
                 logger.error("Order Menu With Cash Test Case Resulted Error")
                 return
 
-            driver.find_element(By.ID, 'hp').send_keys('087741331517')
+            driver.find_element(By.ID, 'hp').send_keys(self.valid_account_phone_number)
 
             try:
                 _ = WebDriverWait(driver, 10).until(
@@ -277,8 +282,7 @@ class OrderTests(unittest.TestCase):
                 logger.error("Order Menu With Cash Test Case Resulted Error")
                 return
 
-            data = requests.post(
-                'https://staging.flick.id/v1/users/auth/verifikasi-token/login?hp=087741331517&tipeUser=user').json()
+            data = requests.post(self.ep_login).json()
             token = data['data']['token']
 
             driver.find_element(By.ID, 'otp').send_keys(token)
@@ -395,7 +399,7 @@ class OrderTests(unittest.TestCase):
                 logger.error("Order Menu With Debit Test Case Resulted Error")
                 return
 
-            driver.find_element(By.ID, 'hp').send_keys('087741331517')
+            driver.find_element(By.ID, 'hp').send_keys(self.valid_account_phone_number)
 
             try:
                 _ = WebDriverWait(driver, 10).until(
@@ -405,8 +409,7 @@ class OrderTests(unittest.TestCase):
                 logger.error("Order Menu With Debit Test Case Resulted Error")
                 return
 
-            data = requests.post(
-                'https://staging.flick.id/v1/users/auth/verifikasi-token/login?hp=087741331517&tipeUser=user').json()
+            data = requests.post(self.ep_login).json()
             token = data['data']['token']
 
             driver.find_element(By.ID, 'otp').send_keys(token)
@@ -537,10 +540,14 @@ class OrderTests(unittest.TestCase):
 
             data = requests.post(self.ep_register).json()
             token = data['data']['token']
-            # for key, value in data.items():
-            #     print(key, ":", value)
-            # print(token)
-            driver.find_element(By.ID, 'otp').send_keys(token)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located((By.ID, 'otp'))
+                ).send_keys(token)
+            except TimeoutException:
+                logger.error("Order Menu Register First Test Case Resulted Error")
+                return
 
             try:
                 _ = WebDriverWait(driver, 10).until(
@@ -663,7 +670,7 @@ class OrderTests(unittest.TestCase):
                 logger.error("Order Menu Add Notes Test Case Resulted Error")
                 return
 
-            driver.find_element(By.ID, 'hp').send_keys('087741331517')
+            driver.find_element(By.ID, 'hp').send_keys(self.valid_account_phone_number)
 
             try:
                 _ = WebDriverWait(driver, 10).until(
@@ -673,7 +680,7 @@ class OrderTests(unittest.TestCase):
                 logger.error("Order Menu Add Notes Test Case Resulted Error")
                 return
 
-            data = requests.post('https://staging.flick.id/v1/users/auth/verifikasi-token/login?hp=087741331517&tipeUser=user').json()
+            data = requests.post(self.ep_login).json()
             token = data['data']['token']
 
             driver.find_element(By.ID, 'otp').send_keys(token)
@@ -791,7 +798,7 @@ class OrderTests(unittest.TestCase):
                     logger.error("Check Order Status After Ordering Test Case Resulted Error")
                     return
 
-                driver.find_element(By.ID, 'hp').send_keys('087741331517')
+                driver.find_element(By.ID, 'hp').send_keys(self.valid_account_phone_number)
 
                 try:
                     _ = WebDriverWait(driver, 10).until(
@@ -801,8 +808,7 @@ class OrderTests(unittest.TestCase):
                     logger.error("Check Order Status After Ordering Test Case Resulted Error")
                     return
 
-                data = requests.post(
-                    'https://staging.flick.id/v1/users/auth/verifikasi-token/login?hp=087741331517&tipeUser=user').json()
+                data = requests.post(self.ep_login).json()
                 token = data['data']['token']
 
                 driver.find_element(By.ID, 'otp').send_keys(token)
