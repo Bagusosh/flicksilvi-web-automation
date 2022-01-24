@@ -878,6 +878,8 @@ class SearchBarTests(unittest.TestCase):
         test_suite.addTest(cls('test_search_menu_description_without_ordering'))
         test_suite.addTest(cls('test_ordering_menu_with_search_menu_name'))
         test_suite.addTest(cls('test_ordering_menu_with_search_menu_description'))
+        test_suite.addTest(cls('test_ordering_menu_register_first_with_search_menu_name'))
+        test_suite.addTest(cls('test_ordering_menu_register_first_with_search_menu_description'))
         test_suite.addTest(cls('test_cancelling_search_menu_name'))
         test_suite.addTest(cls('test_cancelling_search_menu_description'))
         test_suite.addTest(cls('test_search_menu_with_invalid_name'))
