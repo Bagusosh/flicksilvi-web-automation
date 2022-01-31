@@ -118,7 +118,7 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                    EC.visibility_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
                 )
             except TimeoutException:
                 logger.error("Ordering Menu With Search Menu Name Test Case Resulted Error")
@@ -256,7 +256,7 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 15).until(
-                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                    EC.visibility_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
                 )
             except TimeoutException:
                 logger.error("Ordering Menu With Search Menu Description Test Case Resulted Error")
@@ -394,7 +394,7 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                    EC.visibility_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
                 )
             except TimeoutException:
                 logger.error("Ordering Menu Register First With Search Menu Name Test Case Resulted Error")
@@ -542,7 +542,7 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                    EC.visibility_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
                 )
             except TimeoutException:
                 logger.error("Ordering Menu Register First With Search Menu Description Test Case Resulted Error")
@@ -690,13 +690,14 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                    EC.visibility_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
                 )
             except TimeoutException:
                 logger.error("Search Menu Name Without Ordering Test Case Resulted Error")
                 return
 
             assert self.page_text_error not in driver.page_source
+            assert self.valid_first_menu_name in driver.page_source
             logger.success("Search Menu Name Without Ordering Test Case has been Tested")
 
     def test_search_menu_description_without_ordering(self):
@@ -721,7 +722,7 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                    EC.visibility_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
                 )
             except TimeoutException:
                 logger.error("Search Menu Description Without Ordering Test Case Resulted Error")
@@ -752,7 +753,7 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                    EC.visibility_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
                 )
             except TimeoutException:
                 logger.error("Cancelling Search Menu Name Test Case Resulted Error")
@@ -791,7 +792,7 @@ class SearchBarTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
+                    EC.visibility_of_element_located((By.XPATH, self.search_bar_menu_row_xpath))
                 )
             except TimeoutException:
                 logger.error("Cancelling Search Menu Description Test Case Resulted Error")
