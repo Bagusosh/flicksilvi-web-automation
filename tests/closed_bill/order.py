@@ -29,12 +29,15 @@ class OrderTests(unittest.TestCase):
 
         # data
         fake = Faker('id-ID')
+        self.valid_merchant_name = 'Samsan Tech Restoran!!'
 
         self.first_category_name = 'Nasi Goreng'
         self.second_category_name = 'Desserts'
+        self.third_category_name = 'Telur'
 
         self.valid_first_menu_name = 'Nasi Goreng Ikan Teri Asin'
         self.valid_second_menu_name = 'Singkong Goreng'
+        self.valid_third_menu_name = 'Telur Dadar'
         self.valid_account_phone_number = '087741331517'
 
         self.valid_new_account_name = fake.first_name()
@@ -54,6 +57,7 @@ class OrderTests(unittest.TestCase):
         # id
         self.valid_first_category_id = 'nasi-goreng'
         self.valid_second_category_id = 'desserts'
+        self.valid_third_category_id = 'telur'
 
         # Xpath
         self.first_menu_row_xpath = '//*[@id="{id_category}"]/div[2]/div'.format(
@@ -61,6 +65,9 @@ class OrderTests(unittest.TestCase):
         )
         self.second_menu_row_xpath = '//*[@id="{id_category}"]/div[2]/div'.format(
             id_category=self.valid_second_category_id
+        )
+        self.third_menu_row_xpath = '//*[@id="{id_category}"]/div[2]/div'.format(
+            id_category=self.valid_third_category_id
         )
 
         self.category_row_xpath = '//*[@id="root"]/div/div/div[2]/div[2]/div[1]/header/div[2]/div[3]/div/button'
@@ -70,6 +77,7 @@ class OrderTests(unittest.TestCase):
         self.payment_method_list_xpath = '//*[@id="root"]/div/div/div/div[4]'
         self.note_field_xpath = '/html/body/div[2]/div[3]/div/form/div[2]/div/textarea'
         self.order_status_row_xpath = '//*[@id="root"]/div/div/div[1]'
+        self.merchant_title_xpath = '//*[@id="root"]/div/div/div[2]/div[1]/div[1]/div'
 
         self.button_add_menu_shopping_cart_xpath = '/html/body/div[2]/div[3]/div/div/button'
         self.button_cart_order_xpath = '//*[@id="root"]/div/div/div[2]/div[2]/div[3]/div/span/div'
@@ -81,6 +89,7 @@ class OrderTests(unittest.TestCase):
         self.button_save_note_xpath = '/html/body/div[2]/div[3]/div/form/div[3]/button'
         self.button_check_order_status_xpath = '//*[@id="root"]/div/div[1]/div/div[2]/button[1]'
         self.button_check_order_status_navbar_xpath = '//*[@id="root"]/div/div/div[2]/div/button[2]'
+        self.button_add_more_menu_xpath = '//*[@id="root"]/div/div/div/div[2]/div[1]/div[2]/button'
 
         # etc
         self.context = {}
@@ -882,7 +891,178 @@ class OrderTests(unittest.TestCase):
 
                 assert page_exist is True
                 assert self.order_status_row_xpath in driver.page_source
-                logger.success("Order Menu With Cash Test Case has been Tested")
+                logger.success("Check Order Status After Ordering Test Case Resulted Error")
+
+    def test_order_menu_add_more_menu(self):
+        with self.driver as driver:
+
+            # filter category
+            category_row_elements = driver.find_elements(By.XPATH, self.category_row_xpath)
+            for row_element in category_row_elements:
+                if row_element.find_element(By.TAG_NAME, 'span').text == self.first_category_name:
+                    row_element.click()
+
+            # add menu
+            menu_row_elements = driver.find_elements(By.XPATH, self.first_menu_row_xpath)
+            for row_element in menu_row_elements:
+                if row_element.find_element(By.TAG_NAME, 'h5').text == self.valid_first_menu_name:
+                    row_element.find_element(By.TAG_NAME, 'span').click()
+                    break
+
+            # filter category
+            category_row_elements = driver.find_elements(By.XPATH, self.category_row_xpath)
+            for row_element in category_row_elements:
+                if row_element.find_element(By.TAG_NAME, 'span').text == self.second_category_name:
+                    row_element.click()
+
+            # add menu
+            menu_row_elements = driver.find_elements(By.XPATH, self.second_menu_row_xpath)
+            for row_element in menu_row_elements:
+                if row_element.find_element(By.TAG_NAME, 'h5').text == self.valid_second_menu_name:
+                    row_element.find_element(By.TAG_NAME, 'span').click()
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_cart_order_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.text_to_be_present_in_element((By.TAG_NAME, 'h3'), 'Konfirmasi Order')
+                )
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            # if we not use time.sleep, element for button login cant be clicked, because the element has animation
+            time.sleep(2)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, self.button_login_xpath)),
+                    EC.element_to_be_clickable((By.XPATH, self.button_login_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            driver.find_element(By.ID, 'hp').send_keys(self.valid_account_phone_number)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_login_account_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            data = requests.post(self.ep_login).json()
+            token = data['data']['token']
+
+            driver.find_element(By.ID, 'otp').send_keys(token)
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_login_account_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located((By.ID, 'password'))
+                ).send_keys(150600)
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_login_account_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, self.button_add_more_menu_xpath)),
+                    EC.element_to_be_clickable((By.XPATH, self.button_add_more_menu_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 3).until(
+                    EC.text_to_be_present_in_element((By.XPATH, self.merchant_title_xpath), self.valid_merchant_name))
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            # filter category
+            category_row_elements = driver.find_elements(By.XPATH, self.category_row_xpath)
+            for row_element in category_row_elements:
+                if row_element.find_element(By.TAG_NAME, 'span').text == self.third_category_name:
+                    row_element.click()
+
+            # add menu
+            menu_row_elements = driver.find_elements(By.XPATH, self.third_category_name)
+            for row_element in menu_row_elements:
+                if row_element.find_element(By.TAG_NAME, 'h5').text == self.valid_third_menu_name:
+                    row_element.find_element(By.TAG_NAME, 'span').click()
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_cart_order_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.text_to_be_present_in_element((By.TAG_NAME, 'h3'), 'Konfirmasi Order')
+                )
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+
+            # if we use webdriverwait, cant click button payment method
+            time.sleep(2)
+
+            driver.find_element(By.XPATH, '//*[@id="Cash"]').click()
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, self.button_order_and_pay_xpath))
+                ).click()
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                return
+
+            alert = Alert(driver)
+
+            alert.accept()
+
+            try:
+                _ = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, self.order_success_page_xpath))
+                )
+                page_exist = True
+            except TimeoutException:
+                logger.error("Order Menu Add More Menu Test Case Resulted Error")
+                page_exist = False
+                return
+
+            assert page_exist is True
+            logger.success("Order Menu Add More Menu Test Case has been Tested")
 
     @classmethod
     def as_suite(cls, test_suite: unittest.TestSuite) -> unittest.TestSuite:
@@ -891,6 +1071,7 @@ class OrderTests(unittest.TestCase):
         test_suite.addTest(cls('test_order_menu_with_cash'))
         test_suite.addTest(cls('test_order_menu_with_debit'))
         test_suite.addTest(cls('test_order_menu_add_notes'))
+        test_suite.addTest(cls('test_order_menu_add_more_menu'))
         test_suite.addTest(cls('test_check_order_status_after_ordering'))
         return test_suite
 
