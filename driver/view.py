@@ -22,7 +22,7 @@ class MenuViewDriver:
 
         # Data
         self.menu_url = "https://flicksilvi-webview-develop.netlify.app/webview/menu"
-        self.valid_table_id = insert your table id
+        self.valid_table_id = "insert your table id here"
         self.valid_merchant_name = 'Samsan Tech Restoran!!'
         self.valid_table_number = 1
 
